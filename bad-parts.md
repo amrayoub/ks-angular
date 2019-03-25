@@ -27,7 +27,21 @@ theme: Next, 1
 
 ---
 
-# [fit] ngFor list updates
+# [fit] view encapsulation
+
+- overwriting 3rd party styles
+- Angular Material specifically
+
+---
+
+# \*ngFor list updates
+
+- finished with MWE and... it just works ¯\\_(ツ)_/¯
+- tried to reproduce bug we encountered in OWA but.. no
+- anyway
+- when you use ngFor, irregardless of changeStrategy used
+- you can run into **Angular does not render updates** -issues
+- **[⚡ stackBlitz](https://stackblitz.com/edit/ngfor-list-updates)**
 
 ---
 
@@ -68,10 +82,21 @@ __read about__
 
 ---
 
-# [fit] ngIf, ngFor, ngLet
+# [fit] ngIf, ngFor | asyc... ngLet ?
+
+__the good__
+- **| async** makes it easy to use observables
+- **Store.select()** = not a problem: **ReplaySubject**
+- [⚡ stackBlitz](https://stackblitz.com/edit/ngif-ngfor-async)
 
 __the bad__
-- asd
+- **DRY**: [issue](https://github.com/angular/angular/issues/15280), [another issue](https://github.com/angular/angular/issues/2451#issuecomment-330158965)
+- not **Store.select()**? multiple (unicast) subscriptions
+
+**possible solution**:
+- [NGRX utils ngLet](https://github.com/ngrx-utils/ngrx-utils#nglet-directive)
+- [⚡ stackBlitz](https://stackblitz.com/edit/nglet-async)
+- (PROD-1196-owa-send-flow-improvements) ✅🚀🔥🙂
 
 ---
 
@@ -81,14 +106,78 @@ __the bad__
 # [fit] + component
 # [fit] lifecycle
 
-![right filtered](https://media.giphy.com/media/VsuiH69ecp6XC/giphy.gif)
+![right filtered](giphies/state-management.gif)
 
 ---
 
-# state management
+# state management (NGRX)
 
-__the bad__
-- dumb components, smart components ✅
 - encapsulation vs. everything redux ❓
-- @Effects and observables *(do / dont / caveats)*
+- **do** s
+- **don't** tsss...smh
+- **caveats**
+
+---
+
+# [fit] state management (NGRX) DOs
+
+- immutability
+- think out: Action / reducer / effect
+ - for single items
+ - or for list of items
+
+---
+
+# state management (NGRX)
+
+![inline](code/ngrx-state-mutate.png)
+
+![inline, original, fit](code/ngrx-state-immutable.png)
+
+- **{...}** or **[state].map(i => new Item(i))** (deep clone!)
+
+---
+
+# [fit] state management (NGRX) DONTs
+
+- don't dispatch multiple actions and assume synchrononicity
+- **don't write ALL business logic in @Effects** 
+- don't dispatch Actions from @Effects in **tap()** operators. Because, from least bad to horribad:
+ - CPU spike
+ - memory leaks
+ - loops
+ - deadlocks
+
+^1) Needs example: asynchronicity due to Effects
+3) Try as much as you can to put business logic in services. Reusable, easier to test. use service methods in @Effects.
+4) Unpredictability
+- CPU: due to large amounts of Actions being dispatched
+- memleaks: uncompleted Observables
+- loops: chain loops
+- deadlocks: ?
+
+---
+
+# [fit] state management (NGRX) caveats
+
+- write silent failing code.
+- [completion and **.catchError()** in @Effects](https://github.com/ngrx/platform/issues/1364)
+- [RXJS error handling](https://blog.angular-university.io/rxjs-error-handling/)
+
+^Easy to do this. examples: 1) Action does not get dispatched anymore 2) .catchError in main @Effect pipeline 3) observable completes while it should not (first, take, until)
+
+---
+
+# component lifecycle (NGRX)
+
+- dumb components, smart components ✅
+- dumb component: gets only **@Input**'s and **Output()**s
+- (parent) smart component: knows about **store.select()**
+
+![right filtered](https://media.giphy.com/media/VsuiH69ecp6XC/giphy.gif)
+
+
+
+
+
 
